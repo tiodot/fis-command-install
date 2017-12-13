@@ -1,0 +1,10 @@
+{
+    "name": "demo",
+    "protocol": "npm",
+    "npm": {
+      "author": "nfe"
+    },
+    "dependencies": [
+      "npm:@nfe/jquery"
+    ]
+  }
