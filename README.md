@@ -1,8 +1,10 @@
-# fis-command-install
+# fis-command-install-npm
+
+从npm中安装fis组件包
 
 ## Usage
 
-    Usage: install <name> [options]
+    Usage: install-npm <name> [options]
 
     Options:
 

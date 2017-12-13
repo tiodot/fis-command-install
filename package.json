@@ -1,15 +1,15 @@
 {
-  "name": "fis-command-install",
+  "name": "fis-command-install-npm",
   "description": "fis install command.",
-  "version": "0.2.17",
-  "author": "FIS Team <fis@baidu.com>",
+  "version": "0.0.3",
+  "author": "tiodot",
   "homepage": "http://fis.baidu.com/",
   "keywords": [
     "fis"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/fis-dev/fis-command-install.git"
+    "url": "https://github.com/tiodot/fis-command-install.git"
   },
   "engines": {
     "node": ">= 0.8.0"
