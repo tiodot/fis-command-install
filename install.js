@@ -91,6 +91,7 @@ exports.register = function (commander) {
                     });
                     settings.gitlab = fis.config.get('component.gitlab', {});
                     settings.lights = fis.config.get('component.lights', {});
+                    settings.npm = fis.config.get('component.npm', {});
                 })
 
                 .then(function () {
@@ -125,20 +126,22 @@ exports.register = function (commander) {
 
                 // 读取 components.json 如果存在
                 .then(function () {
-                    return getComponentsFromFile('component.json', settings);
+                    return getComponentsFromFile('package.json', settings);
                 })
                 // 判断如果没有component.json的话，使用package.json, 则必须需要package.json文件
                 .then(function (componentJson) {
                     // console.log('get componentJson', componentJson);
                     if (!componentJson) {
-                        return getComponentsFromFile('package.json', settings).then(function () {
-                            if (!settings.components.length) {
-                                throw new Error('missing `component.json` or `package.json`');
-                            }
-                        });
+                        return getComponentsFromFile('component.json', settings);
+                    }
+                    return componentJson;
+                })
+                .then(function () {
+                    if (!settings.components.length) {
+                        throw new Error('missing `component.json` or `package.json`');
                     }
                 })
-                
+
                 .then(function () {
                     var components = settings.components || [];
 
@@ -174,7 +177,7 @@ exports.register = function (commander) {
                         })
 
                         .then(function (components) {
-                            // console.log(components);
+                            // console.log(components.map(c => c.name + '@' + c.version));
 
                             var finalList = [];
                             var posMap = {};
@@ -283,7 +286,10 @@ exports.register = function (commander) {
 
                                     var last = components.length - 1;
                                     var arrs = components.map(function (item, index) {
-                                        return (index === last ? '└── ' : '├── ') + item.type + ':' + item.address + '@' + item.version;
+                                        var version = item.version;
+                                        var versionNum = item.versionNum;
+                                        var versionTxt = versionNum ? (version + '(v' + versionNum + ')') : version;
+                                        return (index === last ? '└── ' : '├── ') + item.type + ':' + item.address + '@' + versionTxt;
                                     });
 
                                     console.log('\nInstalled\n%s', arrs.join('\n'));
@@ -343,14 +349,14 @@ function getComponentsFromFile(fileName, settings) {
     var path = require('path');
     var exists = require('fs').existsSync;
     var componentJson = path.join(settings.root, fileName);
-    // 保存一个config的fileName
-    settings.configFileName = fileName;
 
     // if (!components.length && !exists(componentJson)) {
     //     throw new Error('missing `component.json`');
     // }
 
     if (exists(componentJson)) {
+        // 保存一个config的fileName
+        settings.configFileName = fileName;
         var config = Promise.promisify(require('./lib/config'));
 
         return config(componentJson)
@@ -369,7 +375,7 @@ function getComponentsFromFile(fileName, settings) {
                 ret.github && _.mixin(settings.github, ret.github);
                 ret.gitlab && _.mixin(settings.gitlab, ret.gitlab);
                 ret.lights && _.mixin(settings.lights, ret.lights);
-                ret.npm &&  _.mixin(settings.npm, ret.npm);
+                ret.npm && _.mixin(settings.npm, ret.npm);
                 return ret;
             });
     }
@@ -381,7 +387,6 @@ function strToRemote(components, ignoreInvalid, settings) {
 
         .map(function (component) {
             var type = factory.detect(component);
-
             if (!type) {
                 ignoreInvalid || logger.warn('`%s` is not a valid repository.', component);
                 return null;
