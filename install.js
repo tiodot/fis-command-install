@@ -24,6 +24,7 @@ exports.register = function (commander) {
     commander
         .option('--save', 'save component(s) dependencies into `package.json` file.')
         .option('-r, --root <path>', 'set project root')
+        .option('-u, --unique', 'install component only, not download dependencies')
         .option('--verbose', 'enable verbose mode')
         .option('--download-gitlab-from-svn', 'you don\'t need this.')
         .action(function () {
@@ -31,6 +32,7 @@ exports.register = function (commander) {
             var options = args.pop();
             var settings = {
                 save: !!options.save,
+                unique: !!options.unique,
                 root: options.root || '',
                 downloadGitlabFromSvn: options.downloadGitlabFromSvn,
                 components: args.concat()
@@ -169,7 +171,7 @@ exports.register = function (commander) {
                         specified[item.name] = item._version;
                     });
 
-                    return collector(components)
+                    return collector(components, settings.unique)
                         .then(function (components) {
                             bar.clear();
                             bar = null;
